@@ -19,16 +19,26 @@
         # This will be entered by direnv, or by manually running `nix shell`. This ensures
         # that our development environment will have all the correct tools at the correct
         # version for this project.
-        devShell = pkgs.mkShell {
+        devShells.default = pkgs.mkShell {
           # Here we add any tools that we want in our dev-shell but aren't required to build
           # our application.
-          nativeBuildInputs = with pkgs;
+          packages = with pkgs;
             [
               nixpkgs-fmt
               rustc
               cargo
+              rustfmt
               clippy
+              mcap-cli
             ];
+
+            # Had to do this to get around the system gcc/cc being selected first
+            shellHook = ''
+              alias gcc='${pkgs.stdenv.cc}/bin/gcc'
+              alias cc='${pkgs.stdenv.cc}/bin/cc'
+            '';
+
+            RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
         };
       }
     );
